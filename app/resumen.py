@@ -1,8 +1,8 @@
 import requests
 import json
 
-API_KEY = "AIzaSyB8Dp1tP5jScVPGBxR4kfzt80814rRb1kM"
-MODEL = "gemini-2.0-flash"
+API_KEY = os.getenv("GEMINI_API_KEY")  # Usa variable de entorno
+MODEL = "gemini-1.5-flash-latest"  # Modelo actualizado
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
 
 def resumir_noticias(noticias_api):

@@ -1,29 +1,36 @@
-name: Resumen Diario Automático
-
+name: Generar Resumen Diario
 on:
   schedule:
-    - cron: "0 9 * * *"  # Ejecuta diario a las 9 AM UTC
-  workflow_dispatch:       # Permite ejecución manual
-
+    - cron: '0 8 * * *'  # Ejecuta a las 8 AM UTC (5 AM Argentina)
+  workflow_dispatch:  # Permite ejecución manual
 jobs:
-  generar-resumen:
+  generar:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout del código
+      - name: Checkout código
         uses: actions/checkout@v4
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Instalar dependencias
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install google-generativeai  # Solo si usas Gemini
 
-      - name: Ejecutar el pipeline
+      - name: Listar archivos (debug)
+        run: ls -la
+
+      - name: Ejecutar pipeline
         env:
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           MAIL_DESTINATARIO: ${{ secrets.MAIL_DESTINATARIO }}
-        run: python main.py --output pdf --send
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}  # Solo si usas Gemini
+        run: |
+          python -c "
+          from app.pipeline import ejecutar_pipeline;
+          ejecutar_pipeline([], output_format='pdf', send_mail=True)
+          "

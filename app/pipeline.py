@@ -1,23 +1,30 @@
-from app import cliente, resumen, pdf_generator, html_generator, mail_sender
+from app import cliente, resumen, pdf_generator, mail_sender
 from datetime import datetime
+import traceback
 
 def ejecutar_pipeline(urls, output_format='pdf', send_mail=False):
-    print("🔄 Leyendo feeds...")
-    articulos = cliente.leer_feeds(urls)
+    try:
+        print("🔄 Leyendo feeds...")
+        articulos = cliente.leer_feeds(urls or [])  # Usa lista vacía si urls es None
 
-    print("🧠 Generando resumen...")
-    resumenes = resumen.resumir_noticias(articulos)
+        print("🧠 Generando resumen...")
+        resumenes = resumen.resumir_noticias(articulos)
 
-    fecha = datetime.now().strftime("%Y-%m-%d")
-    if output_format == 'pdf':
-        archivo = f"resumen-{fecha}.pdf"
-        pdf_generator.generar_pdf(resumenes, filename=archivo)
-    else:
-        archivo = f"resumen-{fecha}.html"
-        html_generator.generar_html(resumenes, filename=archivo)
+        fecha = datetime.now().strftime("%Y-%m-%d")
+        archivo = f"/tmp/resumen-{fecha}.{output_format}"  # Usa /tmp en GitHub Actions
 
-    if send_mail:
-        print("📧 Enviando por correo...")
-        mail_sender.enviar_correo(archivo)
+        if output_format == 'pdf':
+            pdf_generator.generar_pdf(resumenes, filename=archivo)
+        else:
+            html_generator.generar_html(resumenes, filename=archivo)
 
-    return archivo
+        if send_mail:
+            print("📧 Enviando por correo...")
+            mail_sender.enviar_correo(archivo)
+
+        return archivo
+
+    except Exception as e:
+        print(f"❌ Error en el pipeline: {str(e)}")
+        print(traceback.format_exc())  # Detalles del error
+        raise  # Para que aparezca en GitHub Actions
