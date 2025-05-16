@@ -1,0 +1,4 @@
+feedparser
+fpdf
+requests
+python-dotenv
