@@ -1,0 +1,20 @@
+name: Ejecutar resumen diario
+on:
+  schedule:
+    - cron: "0 9 * * *"  # Diario a las 9 AM UTC
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Ejecutar programa
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+        run: python main.py --output pdf --send
